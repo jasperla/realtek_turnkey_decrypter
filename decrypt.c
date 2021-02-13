@@ -62,8 +62,8 @@ main(int argc, char *argv[]) {
 unsigned char *
 decrypt(char *idata)
 {
-  EVP_CIPHER_CTX ctx;
-	unsigned char *b64decoded, *odata = NULL;
+  EVP_CIPHER_CTX *ctx;
+  unsigned char *b64decoded, *odata = NULL;
   size_t len = strlen(idata);
   int rc, p_len = len, f_len = 0;
   int rounds = 5;
@@ -82,8 +82,8 @@ decrypt(char *idata)
       return 0;
   }
 
-  EVP_CIPHER_CTX_init(&ctx);
-  if (EVP_DecryptInit_ex(&ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1) {
+  ctx = EVP_CIPHER_CTX_new();
+  if (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1) {
     printf("[-] Failed to setup decryption context.\n");
     return NULL;
   }
@@ -95,11 +95,11 @@ decrypt(char *idata)
   odata = malloc(p_len + AES_BLOCK_SIZE);
 
   /* Decrypt the data using the available key. */
-  EVP_DecryptInit_ex(&ctx, NULL, NULL, NULL, NULL);
-  EVP_DecryptUpdate(&ctx, odata, &p_len, b64decoded, len);
-  EVP_DecryptFinal_ex(&ctx, odata + p_len, &f_len);
+  EVP_DecryptInit_ex(ctx, NULL, NULL, NULL, NULL);
+  EVP_DecryptUpdate(ctx, odata, &p_len, b64decoded, len);
+  EVP_DecryptFinal_ex(ctx, odata + p_len, &f_len);
 
-  EVP_CIPHER_CTX_cleanup(&ctx);
+  EVP_CIPHER_CTX_cleanup(ctx);
 
-	return odata;
+  return odata;
 }
