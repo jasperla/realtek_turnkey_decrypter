@@ -89,7 +89,10 @@ decrypt(char *idata)
   }
 
   /* Decode the base64-encoded password. */
-  Base64Decode(idata, &b64decoded, &len);
+  if (Base64Decode(idata, &b64decoded, &len) != 0) {
+    printf("[-] Decoding failed; possibly an incomplete string provided.\n");
+    return NULL;
+  }
 
   /* Allocate memory to contain the plaintext data and add an extra block due to padding. */
   odata = malloc(p_len + AES_BLOCK_SIZE);
